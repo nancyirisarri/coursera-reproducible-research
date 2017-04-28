@@ -1,4 +1,6 @@
 # Reproducible Research: Peer Assessment 1
+Nancy Irisarri  
+April 28, 2017  
 
 ## Loading and preprocessing the data
 We choose the function `read.csv` and pass options for indicating that the file has a header and that NAs should be removed.
@@ -15,37 +17,17 @@ We begin by loading the necessary libraries.
 
 ```r
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(ggplot2)
 ```
 
-We will concatenate commands with the operator `%>%`. First we group the data by the *date* column with the `group_by` function. Next we make a column to keep the daily total number of steps by calling the `summarize` function. We pass to it the desired column name `dailySum` and the function that we need, in this case `sum`. Since there might be NAs in the data we also pass the option `na.rm=TRUE` to remove them.
+We will concatenate commands with the operator `%>%`. First we group the data by the *date* column with the `group_by` function. Next we make a column to keep the daily total number of steps by calling the `summarize` function. We pass to it the desired column name *dailySum* and the function that we need, in this case `sum`. Since there might be NAs in the data we also pass the option `na.rm=TRUE` to remove them.
 
 
 ```r
 result <- data %>% group_by(date) %>% summarize(dailySum = sum(steps, na.rm=TRUE))
 ```
 
-Next we make a histogram of the total number of steps taken each day.
+With this result we make a histogram of the total number of steps taken each day.
 
 
 ```r
@@ -84,18 +66,16 @@ We again concatenate commands with the operator `%>%`. Start by grouping the dat
 intMeans <- data %>% group_by(interval) %>% summarize(intMean = mean(steps, na.rm=TRUE))
 ```
 
-Next we plot a time series of the 5-minute intervals and the averages. For clarity we identify each of the 288 intervals with a sequential number.
+Next we plot a time series of the 5-minute intervals and the averages.
 
 
 ```r
-intMeans <- intMeans %>% mutate(intNum = c(1:288))
-
-plot(intMeans$intNum, intMeans$intMean, type="l", xlab="Interval", ylab="Average number of steps", lwd=1, main="Average Number of Steps per Interval")
+plot(intMeans$interval, intMeans$intMean, type="l", xlab="Interval", ylab="Average number of steps", lwd=1, main="Average Number of Steps per Interval")
 ```
 
 ![](PA1_template_files/figure-html/plot_interval_means-1.png)<!-- -->
 
-The 5-minute interval with the maximum number of steps is interval 835, corresponding to interval number 104. Below the calculation.
+The 5-minute interval with the maximum number of steps is interval 835. Below the calculation.
 
 
 ```r
@@ -103,10 +83,10 @@ intMeans %>% filter(intMean == max(intMean))
 ```
 
 ```
-## # A tibble: 1 × 3
-##   interval  intMean intNum
-##      <int>    <dbl>  <int>
-## 1      835 206.1698    104
+## # A tibble: 1 × 2
+##   interval  intMean
+##      <int>    <dbl>
+## 1      835 206.1698
 ```
 
 
@@ -122,7 +102,7 @@ length(data[is.na(data$steps),1])
 ## [1] 2304
 ```
 
-We choose to fill in missing values with the mean for that 5-minute interval. We make a `counter` so that we can take the mean corresponding to a certain interval. The loop goes through the rows of the *steps* column and when an NA is found it is substituted by the mean for that interval. This mean is extracted from the `intMeans` data frame using the mentioned `counter` variable. In order to extract the mean for one of the 288 intervals, the counter is increased by 1 and reset when it is equal to 289. The new dataset is stored in a new data frame.
+We choose to fill in missing values with the mean for that 5-minute interval averaged across all days. We make a `counter` variable so that we can take the mean corresponding to a certain interval. The loop goes through the rows of the *steps* column and when an NA is found it is substituted by the mean for that interval. This mean is extracted from the `intMeans` data frame using the mentioned `counter` variable. In order to extract the mean for one of the 288 intervals, the counter is increased by 1 and reset when it is equal to 289. The new dataset is stored in a new data frame.
 
 
 ```r
