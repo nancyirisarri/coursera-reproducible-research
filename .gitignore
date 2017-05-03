@@ -216,3 +216,5 @@ pip-log.txt
 .mr.developer.cfg
 *.RData
 *.Rhistory
+
+week4/assignment_cache
