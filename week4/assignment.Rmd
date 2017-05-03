@@ -1,0 +1,170 @@
+---
+title: "Impact of Events from the NOAA Storm Database on Population Health and Economy"
+author: "Nancy Irisarri"
+date: "April 29, 2017"
+output: html_document
+---
+
+
+# Impact of Events from the NOAA Storm Database on Population Health and Economy
+
+## Synopsis
+
+Severe meteorological phenomena can affect the communities and municipalities where they occur. These events often cause problems on population health as well as financial challenges. Furthermore, the evidence for climate change means that neutralizing the impact of storms and severe weather events should be a priority for policy makers.
+
+In this report we explore the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. The database contains information on major storms and weather events in the United States. We will use the stored estimates of fatalities, injuries, and property damage in order to study the most harmful events.
+
+## Data Processing 
+We begin by loading the necessary libraries. 
+
+```{r, message=FALSE}
+library(dplyr)
+library(RColorBrewer)
+```
+
+We read in the data from the raw CSV file. The file contains the data in comma-separated values.
+
+```{r}
+noaa <- read.csv("data/repdata_data_storm_data.csv")
+```
+
+Next we check the dimensions of the data and the first few rows.
+
+```{r}
+dim(noaa)
+head(noaa[,1:13])
+```
+
+The column headers are properly formated for R data frames.
+```{r}
+colnames(noaa)
+```
+
+The columns we are interested in in relation to population health are *FATALITIES* and *INJURIES* and in relation to economic consequences *PROPDMG* and *CROPDMG*. We also need event type which is in the column *EVTYPE*. We extract these columns and look at some summary statistics.
+
+```{r}
+noaa <- noaa %>% select(FATALITIES, INJURIES, PROPDMG, CROPDMG, EVTYPE)
+
+summary(noaa$FATALITIES)
+summary(noaa$INJURIES)
+summary(noaa$PROPDMG)
+summary(noaa$CROPDMG)
+```
+
+Immediately we see that there is a large difference between the mean and the maximum values in all of the variables. There are no missing values.
+
+## Results
+
+### Most harmful events with respect to population health
+
+We consider harmful events as events that cause fatalities or injuries. We make a histogram to look at the distribution of fatalities and injuries.
+
+```{r fig.cap="Figure 1: Histogram of the distribution of fatalities (left) and injuries (right)."}
+par(mfrow = c(1, 2), mar=c(4.5, 7.1, 0, 0), oma=c(0, 0, 1, 0))
+
+histFatalities <- hist(noaa$FATALITIES, col="blue", xlab="Fatalities", main=NULL)
+#cap <- "Histogram of the distribution of fatalities."
+
+histInjuries <- hist(noaa$INJURIES, col="red", xlab="Injuries", main=NULL)
+#cap <- "Histogram of the distribution of injuries."
+
+title(main="Distribution of Fatalities and Injuries", outer=TRUE)
+```
+
+We look at the counts and breaks of each of the histograms.
+
+```{r}
+histFatalities$counts
+histFatalities$breaks
+
+histInjuries$counts
+histInjuries$breaks
+```
+
+From this we see that the great majority of events cause between 0 and 20 fatalities. Meanwhile most events cause less than 100 injuries. Therefore a good subset of data to look at are events that cause more than 20 fatalities and events that cause more than 100 injuries. The `filter()` function is used to extract the desired rows. To study the fatalities we keep the *FATALITITES* column while for the injuries we keep the *INJURIES* column. Then these are grouped by event type using the `group_by()` function. For clarity we add columns to the subsets to hold the *sum* and *mean*.
+
+
+```{r}
+subFatalitiesSum <- noaa %>% filter(FATALITIES > 20) %>% select(FATALITIES, EVTYPE) %>% group_by(EVTYPE) %>% summarize(total=sum(FATALITIES))
+
+subFatalitiesMean <- noaa %>% filter(FATALITIES > 20) %>% select(FATALITIES, EVTYPE) %>% group_by(EVTYPE) %>% summarize(means=mean(FATALITIES))
+
+subInjuriesSum <- noaa %>% filter(INJURIES > 100) %>% select(INJURIES, EVTYPE) %>% group_by(EVTYPE) %>% summarize(total=sum(INJURIES))
+
+subInjuriesMean <- noaa %>% filter(INJURIES > 100) %>% select(INJURIES, EVTYPE) %>% group_by(EVTYPE) %>% summarize(means=mean(INJURIES))
+```
+
+We make bar plots of the total number and mean for fatalities by event type.
+
+```{r fig.cap="Figure 2: Sum (left) and average (right) of fatalities by event type."}
+cols <- brewer.pal(length(subFatalitiesSum$EVTYPE), "Set3")
+
+op<-par(no.readonly=TRUE)
+par(op)
+par(mfrow=c(1, 2), oma=c(2, 3, 2, 2), mar = c(4, 2, 2, 0))
+
+b <- barplot(subFatalitiesSum$total, ylab="Fatalities", axes=FALSE, col=cols, main="Total Number")
+usr <- par("usr")
+par(usr=c(usr[1:2], 0, 1600))
+axis(2, at=seq(0, 1600, 400))
+
+legend(x=0,y=-50, as.character(subFatalitiesSum$EVTYPE[1:4]), fill=cols[1:4], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+legend(x=0,y=-150, as.character(subFatalitiesSum$EVTYPE[5:7]), fill=cols[5:7], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+legend(x=0,y=-250, as.character(subFatalitiesSum$EVTYPE[8:9]), fill=cols[8:9], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+
+b <- barplot(subFatalitiesMean$means, ylab="Fatalities",axes=FALSE, col=cols, main="Average")
+usr <- par("usr")
+par(usr=c(usr[1:2], 0, 350))
+axis(2, at=seq(0, 350, 50))
+
+mtext(text="Event type", side=1,line=0, outer=TRUE)
+
+title(main="Fatalities by Event Type", outer=TRUE, cex=0.5)
+```
+
+From the left plot in Figure 2 it can be seen that the event type *TORNADO* has caused the highest amount of fatalities (1523 persons), followed by *EXCESSIVE HEAT* (651 persons) and *HEAT* (610 persons). Meanwhile, the right plot in Figure 2 shows that on average events with type *HEAT* cause the most fatalities (305.0 persons). The event in the data that caused the highest amount of fatalities (583 fatalities) is of type *HEAT* so its average is most likely dominated by that event. The next highest averages correspond to *EXTREME HEAT* (57.0 persons), *TORNADO* (41.2 persons), and *EXCESSIVE HEAT* (40.7 persons).
+
+We make similar plots of the total number and mean for injuries by event type.
+
+```{r fig.cap="Figure 3: Sum (left) and average (right) of injuries by event type."}
+#cols <- brewer.pal(length(subInjuriesSum$EVTYPE), "Set3")
+c25 <- c("dodgerblue2","#E31A1C", # red
+                "green4",
+                "#6A3D9A", # purple
+                "#FF7F00", # orange
+                "black","gold1",
+                "skyblue2","#FB9A99", # lt pink
+                "palegreen2",
+                "#CAB2D6", # lt purple
+                "#FDBF6F", # lt orange
+                "gray70", "khaki2",
+                "maroon","orchid1","deeppink1","blue1","steelblue4",
+                "darkturquoise","green1","yellow4","yellow3",
+                "darkorange4","brown")
+
+op<-par(no.readonly=TRUE)
+par(op)
+par(mfrow=c(1, 2), oma=c(3, 3, 2, 2), mar = c(5, 2, 2, 0))
+
+b <- barplot(subInjuriesSum$total, ylab="Injuries", axes=FALSE, col=c25[1:17], main="Total Number")
+usr <- par("usr")
+par(usr=c(usr[1:2], 0, 36000))
+axis(2, at=seq(0, 36000, 9000))
+
+#legend(x=0,y=50, as.character(subInjuriesSum$EVTYPE[1:4]), fill=c25[1:4], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+#legend(x=0,y=-200, as.character(subInjuriesSum$EVTYPE[5:8]), fill=c25[5:8], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+legend(x=0,y=-250, as.character(subInjuriesSum$EVTYPE[9:12]), fill=c25[9:12], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+legend(x=0,y=-500, as.character(subInjuriesSum$EVTYPE[13:16]), fill=c25[13:16], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+#legend(x=0,y=-450, as.character(subInjuriesSum$EVTYPE[17]), fill=c25[17], cex=0.6, box.lty=0, xpd=NA, horiz=TRUE)
+
+b <- barplot(subInjuriesMean$means, ylab="Injuries", axes=FALSE, col=c25[1:17], main="Average")
+usr <- par("usr")
+par(usr=c(usr[1:2], 0, 1600))
+axis(2, at=seq(0, 1600, 400))
+
+mtext(text="Event type", side=1,line=0, outer=TRUE)
+
+title(main="Injuries by Event Type", outer=TRUE, cex=0.5)
+```
+
+!!! Across the United States, which types of events have the greatest economic consequences?
