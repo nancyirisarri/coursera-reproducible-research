@@ -218,3 +218,5 @@ pip-log.txt
 *.Rhistory
 
 week4/assignment_cache
+week4/rsconnect/documents/assignment.Rmd/rpubs.com/rpubs/Document.dcf
+*.dcf
