@@ -1,3 +1,7 @@
+## Preamble
+
+Final document can be accessed as a web page at https://nancyirisarri.github.io/coursera-reproducible-research/week2/.
+
 ## Introduction
 
 It is now possible to collect a large amount of data about personal
