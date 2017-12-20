@@ -88,7 +88,7 @@ intMeans %>% filter(intMean == max(intMean))
 ```
 
 ```
-## # A tibble: 1 × 2
+## # A tibble: 1 Ã— 2
 ##   interval  intMean
 ##      <int>    <dbl>
 ## 1      835 206.1698
