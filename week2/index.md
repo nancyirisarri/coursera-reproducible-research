@@ -1,6 +1,11 @@
-# Reproducible Research: Peer Assessment 1
-Nancy Irisarri  
-April 28, 2017  
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "Nancy Irisarri"
+date: "April 28, 2017"
+output: 
+  html_document:
+    keep_md: true
+---
 
 ## Loading and preprocessing the data
 We choose the function `read.csv` and pass options for indicating that the file has a header and that NAs should be removed.
@@ -34,7 +39,7 @@ With this result we make a histogram of the total number of steps taken each day
 hist(result$dailySum, xlab="Steps", ylab="Count (days)", main="Daily Total Number of Steps")
 ```
 
-![](PA1_template_files/figure-html/hist_total_steps-1.png)<!-- -->
+![](index_files/figure-html/hist_total_steps-1.png)<!-- -->
 
 The mean and median of the total number of steps taken per day are below.
 
@@ -73,7 +78,7 @@ Next we plot a time series of the 5-minute intervals and the averages.
 plot(intMeans$interval, intMeans$intMean, type="l", xlab="Interval", ylab="Average number of steps", lwd=1, main="Average Number of Steps per Interval")
 ```
 
-![](PA1_template_files/figure-html/plot_interval_means-1.png)<!-- -->
+![](index_files/figure-html/plot_interval_means-1.png)<!-- -->
 
 The 5-minute interval with the maximum number of steps is interval 835. Below the calculation.
 
@@ -83,7 +88,7 @@ intMeans %>% filter(intMean == max(intMean))
 ```
 
 ```
-## # A tibble: 1 Ã— 2
+## # A tibble: 1 × 2
 ##   interval  intMean
 ##      <int>    <dbl>
 ## 1      835 206.1698
@@ -143,7 +148,7 @@ resultFilled <- dataFilled %>% group_by(date) %>% summarize(dailySum = sum(steps
 hist(resultFilled$dailySum, xlab="Steps", ylab="Count (days)", main="Daily Total Number of Steps for Imputed Dataset")
 ```
 
-![](PA1_template_files/figure-html/hist_total_steps_imputed-1.png)<!-- -->
+![](index_files/figure-html/hist_total_steps_imputed-1.png)<!-- -->
 
 The mean and median total number of steps taken per day for the imputed dataset are as follows. 
 
@@ -190,4 +195,4 @@ ggplot(intMeansFilled, aes(x=interval, y=intMean)) + geom_line() + facet_grid(da
   theme(panel.spacing = unit(0.5, "lines"))
 ```
 
-![](PA1_template_files/figure-html/plot_interval_means_daytype-1.png)<!-- -->
+![](index_files/figure-html/plot_interval_means_daytype-1.png)<!-- -->
